@@ -2,16 +2,10 @@ package com.alfikri.rizky.realtimepricetracker.data.websocket
 
 import com.alfikri.rizky.realtimepricetracker.data.model.StockDto
 
-/**
- * Generates mock stock data for the 30 tracked symbols
- * Based on the architecture document specifications
- */
+// Generate mock data for the 30 stocks we're tracking
 class StockDataGenerator {
 
-    /**
-     * Initial stock data with base prices
-     * Contains all 30 stock symbols from the architecture document
-     */
+    // TODO: maybe add more stocks later?
     fun generateInitialStocks(): List<StockDto> {
         return listOf(
             createStock("AAPL", 175.0, "Apple Inc."),
@@ -47,9 +41,6 @@ class StockDataGenerator {
         )
     }
 
-    /**
-     * Creates a stock DTO with initial price
-     */
     private fun createStock(symbol: String, price: Double, companyName: String): StockDto {
         return StockDto(
             symbol = symbol,
@@ -61,9 +52,7 @@ class StockDataGenerator {
         )
     }
 
-    /**
-     * Maps stock symbols to company domains for icon URLs
-     */
+    // Map symbols to domains for clearbit logo URLs
     private fun getCompanyDomain(symbol: String): String {
         return when (symbol) {
             "AAPL" -> "apple.com"

@@ -5,86 +5,42 @@ import com.alfikri.rizky.realtimepricetracker.domain.repository.StockRepository
 import kotlinx.coroutines.flow.Flow
 
 /**
- * Combined use case class that encapsulates all stock-related business logic
- * This single class replaces multiple individual use case classes for simplicity
+ * Combined use case for stock operations
  *
- * Responsibilities:
- * - Observe real-time stock price updates
- * - Start/Stop price feed
- * - Monitor WebSocket connection state
- * - Provide business logic for stock operations
+ * Note: Originally had separate use cases but merged for simplicity
  */
 class StockUseCase(
     private val stockRepository: StockRepository
 ) {
 
-    /**
-     * Observes real-time stock price updates
-     *
-     * This function provides a Flow of stock list that updates every 2 seconds
-     * with new price data from the WebSocket connection.
-     *
-     * @return Flow<List<Stock>> - Continuous stream of stock price updates
-     */
+    // Observe real-time stock updates (every 2s via WebSocket)
     fun observeStocks(): Flow<List<Stock>> {
         return stockRepository.observeStocks()
     }
 
-    /**
-     * Observes the WebSocket connection state
-     *
-     * Useful for UI to display connection status indicator (green/red dot)
-     *
-     * @return Flow<Boolean> - true when connected, false when disconnected
-     */
+    // Connection state for UI indicator
     fun observeConnectionState(): Flow<Boolean> {
         return stockRepository.observeConnectionState()
     }
 
     /**
-     * Starts the real-time price feed
-     *
-     * This will:
-     * 1. Establish WebSocket connection
-     * 2. Begin sending stock data every 2 seconds
-     * 3. Start receiving echoed data back from server
-     *
+     * Starts the price feed
      * @throws Exception if connection fails
      */
     suspend fun startPriceFeed() {
         stockRepository.startPriceFeed()
     }
 
-    /**
-     * Stops the real-time price feed
-     *
-     * This will:
-     * 1. Stop sending stock data
-     * 2. Close WebSocket connection gracefully
-     * 3. Clean up resources
-     */
+    // Stop feed and cleanup
     suspend fun stopPriceFeed() {
         stockRepository.stopPriceFeed()
     }
 
-    /**
-     * Checks if the price feed is currently active
-     *
-     * @return true if feed is running, false otherwise
-     */
     fun isFeedActive(): Boolean {
         return stockRepository.isFeedActive()
     }
 
-    /**
-     * Filters stocks by symbol (case-insensitive search)
-     *
-     * Business logic example: Filter operation in domain layer
-     *
-     * @param stocks List of stocks to filter
-     * @param query Search query string
-     * @return Filtered list of stocks matching the query
-     */
+    // Filter by symbol - case insensitive
     fun filterStocksBySymbol(stocks: List<Stock>, query: String): List<Stock> {
         if (query.isBlank()) return stocks
         return stocks.filter { stock ->
@@ -92,16 +48,7 @@ class StockUseCase(
         }
     }
 
-    /**
-     * Sorts stocks based on sort type and order
-     *
-     * Business logic: Sorting operations in domain layer
-     *
-     * @param stocks List of stocks to sort
-     * @param sortType Type of sorting (BY_NAME or BY_PRICE)
-     * @param sortOrder Order of sorting (ASCENDING or DESCENDING)
-     * @return Sorted list of stocks
-     */
+    // Sort stocks by name or price
     fun sortStocks(
         stocks: List<Stock>,
         sortType: SortType,
@@ -120,13 +67,7 @@ class StockUseCase(
     }
 
     /**
-     * Detects which stocks have had price changes
-     *
-     * Business logic: Compare previous and current stock lists to identify changes
-     *
-     * @param previousStocks Previous list of stocks
-     * @param currentStocks Current list of stocks
-     * @return Set of stock symbols that had price changes
+     * Compare previous vs current to find changed stocks
      */
     fun detectPriceChanges(
         previousStocks: List<Stock>,
@@ -140,63 +81,33 @@ class StockUseCase(
         }.map { it.symbol }.toSet()
     }
 
-    /**
-     * Gets stocks that are currently trending up (positive growth)
-     *
-     * @param stocks List of stocks
-     * @return List of stocks with positive price changes
-     */
     fun getTrendingUpStocks(stocks: List<Stock>): List<Stock> {
         return stocks.filter { it.price > it.previousPrice }
     }
 
-    /**
-     * Gets stocks that are currently trending down (negative growth)
-     *
-     * @param stocks List of stocks
-     * @return List of stocks with negative price changes
-     */
     fun getTrendingDownStocks(stocks: List<Stock>): List<Stock> {
         return stocks.filter { it.price < it.previousPrice }
     }
 
-    /**
-     * Calculates average price across all stocks
-     *
-     * @param stocks List of stocks
-     * @return Average price, or 0.0 if list is empty
-     */
     fun calculateAveragePrice(stocks: List<Stock>): Double {
         if (stocks.isEmpty()) return 0.0
         return stocks.sumOf { it.price } / stocks.size
     }
 
-    /**
-     * Gets top N performing stocks by price change percentage
-     *
-     * @param stocks List of stocks
-     * @param count Number of top stocks to return
-     * @return List of top performing stocks
-     */
+    // Get top performers by percentage change
     fun getTopPerformers(stocks: List<Stock>, count: Int = 5): List<Stock> {
         return stocks
-            .filter { it.previousPrice > 0 }
+            .filter { it.previousPrice > 0 } // avoid division by zero
             .sortedByDescending { (it.price - it.previousPrice) / it.previousPrice }
             .take(count)
     }
 }
 
-/**
- * Enum for sort type options
- */
 enum class SortType {
     BY_NAME,
     BY_PRICE
 }
 
-/**
- * Enum for sort order options
- */
 enum class SortOrder {
     ASCENDING,
     DESCENDING

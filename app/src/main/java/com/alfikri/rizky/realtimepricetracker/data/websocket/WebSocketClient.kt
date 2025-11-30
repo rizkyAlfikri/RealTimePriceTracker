@@ -24,8 +24,8 @@ import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 
 /**
- * WebSocket client for real-time stock price updates
- * Connects to Postman Echo WebSocket server and sends/receives stock data
+ * WebSocket client for real-time stock updates
+ * Uses Postman Echo server for testing
  */
 class WebSocketClient(
     private val okHttpClient: OkHttpClient,
@@ -34,33 +34,22 @@ class WebSocketClient(
 ) {
     private val TAG = "WebSocketClient"
 
-    // WebSocket connection state
     private val _connectionState = MutableStateFlow<WebSocketState>(WebSocketState.Disconnected)
     val connectionState: StateFlow<WebSocketState> = _connectionState.asStateFlow()
 
-    // Stock price updates stream
+    // TODO: Consider using StateFlow for better state management
     private val _stockUpdates = MutableSharedFlow<StockDto>(
         replay = 0,
-        extraBufferCapacity = 64,
+        extraBufferCapacity = 64, // should be enough for most cases
         onBufferOverflow = kotlinx.coroutines.channels.BufferOverflow.DROP_OLDEST
     )
     val stockUpdates: SharedFlow<StockDto> = _stockUpdates.asSharedFlow()
 
-    // WebSocket instance
     private var webSocket: WebSocket? = null
-
-    // Job for sending periodic updates
     private var sendJob: Job? = null
-
-    // Coroutine scope for background operations
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-
-    // Current stock data
     private var currentStocks: List<StockDto> = emptyList()
 
-    /**
-     * Connects to the WebSocket server
-     */
     fun connect() {
         if (_connectionState.value.isConnected()) {
             Log.d(TAG, "Already connected")
@@ -77,11 +66,8 @@ class WebSocketClient(
         webSocket = okHttpClient.newWebSocket(request, createWebSocketListener())
     }
 
-    /**
-     * Disconnects from the WebSocket server
-     */
     fun disconnect() {
-        Log.d(TAG, "Disconnecting from WebSocket...")
+        Log.d(TAG, "Disconnecting...")
         _connectionState.value = WebSocketState.Closing
 
         sendJob?.cancel()
@@ -93,34 +79,29 @@ class WebSocketClient(
         _connectionState.value = WebSocketState.Disconnected
     }
 
-    /**
-     * Starts sending stock price updates periodically
-     */
+    // Start periodic price updates every 2s
     fun startSendingPrices() {
         if (sendJob?.isActive == true) {
             Log.d(TAG, "Already sending prices")
             return
         }
 
-        // Initialize stocks if empty
         if (currentStocks.isEmpty()) {
             currentStocks = stockDataGenerator.generateInitialStocks()
         }
 
-        Log.d(TAG, "Starting to send price updates every ${UPDATE_INTERVAL_MS}ms")
+        Log.d(TAG, "Starting price updates every ${UPDATE_INTERVAL_MS}ms")
 
         sendJob = scope.launch {
             while (isActive && _connectionState.value.isConnected()) {
                 currentStocks.forEach { stock ->
-                    // Update stock with random price change
                     val updatedStock = stock.withRandomPriceChange()
 
-                    // Update in our list
+                    // Update our local list
                     currentStocks = currentStocks.map {
                         if (it.symbol == updatedStock.symbol) updatedStock else it
                     }
 
-                    // Send to WebSocket
                     val message = json.encodeToString(updatedStock)
                     val sent = webSocket?.send(message) ?: false
 
@@ -134,18 +115,12 @@ class WebSocketClient(
         }
     }
 
-    /**
-     * Stops sending stock price updates
-     */
     fun stopSendingPrices() {
         Log.d(TAG, "Stopping price updates")
         sendJob?.cancel()
         sendJob = null
     }
 
-    /**
-     * Checks if currently connected
-     */
     fun isConnected(): Boolean {
         return _connectionState.value.isConnected()
     }

@@ -3,37 +3,21 @@ package com.alfikri.rizky.realtimepricetracker.domain.repository
 import com.alfikri.rizky.realtimepricetracker.domain.model.Stock
 import kotlinx.coroutines.flow.Flow
 
-/**
- * Repository interface for stock data operations
- * This interface defines the contract for data layer implementation
- */
+// Repository contract for stock data
 interface StockRepository {
 
-    /**
-     * Observes the real-time stock price updates
-     * @return Flow of list of stocks with updated prices
-     */
+    // Get real-time stock updates as a Flow
     fun observeStocks(): Flow<List<Stock>>
 
-    /**
-     * Observes the WebSocket connection state
-     * @return Flow of boolean indicating connection status (true = connected, false = disconnected)
-     */
+    // Track WebSocket connection status
     fun observeConnectionState(): Flow<Boolean>
 
-    /**
-     * Starts the real-time price feed by connecting to WebSocket
-     */
+    // Connect to the price feed
     suspend fun startPriceFeed()
 
-    /**
-     * Stops the real-time price feed by disconnecting from WebSocket
-     */
+    // Disconnect from the price feed
     suspend fun stopPriceFeed()
 
-    /**
-     * Checks if the price feed is currently active
-     * @return true if feed is active, false otherwise
-     */
+    // Check if we're currently connected
     fun isFeedActive(): Boolean
 }
