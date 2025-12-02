@@ -55,7 +55,7 @@ class StockRepositoryImpl(
                 webSocketClient.connect()
 
                 // Wait a bit for connection to establish
-                kotlinx.coroutines.delay(1000)
+                kotlinx.coroutines.delay(2000)
 
                 // Check if connection was successful
                 if (!webSocketClient.isConnected()) {
