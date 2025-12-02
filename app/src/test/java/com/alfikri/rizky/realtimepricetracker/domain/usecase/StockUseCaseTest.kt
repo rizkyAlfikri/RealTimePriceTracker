@@ -125,24 +125,6 @@ class StockUseCaseTest {
     // ========== sortStocks Tests ==========
 
     @Test
-    fun `sortStocks by name ascending`() {
-        // When
-        val result = stockUseCase.sortStocks(testStocks, SortType.BY_NAME, SortOrder.ASCENDING)
-
-        // Then
-        assertThat(result.map { it.symbol }).containsExactly("AAPL", "AMZN", "GOOGL", "MSFT", "NVDA").inOrder()
-    }
-
-    @Test
-    fun `sortStocks by name descending`() {
-        // When
-        val result = stockUseCase.sortStocks(testStocks, SortType.BY_NAME, SortOrder.DESCENDING)
-
-        // Then
-        assertThat(result.map { it.symbol }).containsExactly("NVDA", "MSFT", "GOOGL", "AMZN", "AAPL").inOrder()
-    }
-
-    @Test
     fun `sortStocks by price ascending`() {
         // When
         val result = stockUseCase.sortStocks(testStocks, SortType.BY_PRICE, SortOrder.ASCENDING)

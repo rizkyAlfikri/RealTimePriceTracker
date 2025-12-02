@@ -36,10 +36,6 @@ class StockUseCase(
         stockRepository.stopPriceFeed()
     }
 
-    fun isFeedActive(): Boolean {
-        return stockRepository.isFeedActive()
-    }
-
     // Filter by symbol - case insensitive
     fun filterStocksBySymbol(stocks: List<Stock>, query: String): List<Stock> {
         if (query.isBlank()) return stocks
@@ -51,14 +47,10 @@ class StockUseCase(
     // Sort stocks by name or price
     fun sortStocks(
         stocks: List<Stock>,
-        sortType: SortType,
+        sortType: SortType = SortType.BY_PRICE,
         sortOrder: SortOrder
     ): List<Stock> {
         return when (sortType) {
-            SortType.BY_NAME -> when (sortOrder) {
-                SortOrder.ASCENDING -> stocks.sortedBy { it.symbol }
-                SortOrder.DESCENDING -> stocks.sortedByDescending { it.symbol }
-            }
             SortType.BY_PRICE -> when (sortOrder) {
                 SortOrder.ASCENDING -> stocks.sortedBy { it.price }
                 SortOrder.DESCENDING -> stocks.sortedByDescending { it.price }
@@ -104,7 +96,6 @@ class StockUseCase(
 }
 
 enum class SortType {
-    BY_NAME,
     BY_PRICE
 }
 
