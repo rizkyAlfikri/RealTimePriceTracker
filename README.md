@@ -52,11 +52,7 @@ This application demonstrates real-time stock price tracking by connecting to a 
 ### Demo Video
 
 > **Note**: Add a demo video showing the real-time price updates and flash animations in action.
-
-https://user-images.githubusercontent.com/your-video-link.mp4
-
-*Or link to YouTube/other video hosting:*
-- 📹 [Watch Demo Video](https://youtube.com/your-demo-link)
+- 📹 [Watch Demo Video](https://drive.google.com/file/d/1ufmc9WZaCs6mq8YPyMa7NIMoHgR_7Hgt/view?usp=sharing)
 
 ## Features
 
